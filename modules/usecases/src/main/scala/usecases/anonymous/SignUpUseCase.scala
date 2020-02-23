@@ -1,6 +1,7 @@
 package usecases.anonymous
 
-import usecases.UseCase
+import usecases.{UseCase, UseCaseError}
+import usecases.UseCaseError.AlreadyExists
 import entities.domain._
 import repositories.AccountRepository
 
@@ -12,14 +13,14 @@ case class SignUpOutput(id: AccountId)
  * @param accountRepository
  */
 class SignUpUseCase(accountRepository: AccountRepository) extends UseCase[SignUpInput, SignUpOutput] {
-  def execute(inputData: SignUpInput): SignUpOutput = {
+  def execute(inputData: SignUpInput): Either[UseCaseError, SignUpOutput] = {
     accountRepository.findBy(inputData.email) match {
       case None => {
         accountRepository.store(Account(inputData.email, inputData.password, inputData.name))
-        SignUpOutput(AccountId(10L))
+        Right(SignUpOutput(AccountId(10L)))
       }
       case Some(_) => {
-        SignUpOutput(AccountId(0L))
+        Left(AlreadyExists)
       }
     }
   }
