@@ -21,8 +21,10 @@ class SignUpUseCase(accountRepository: AccountRepository)
         Left(AlreadyExists)
       }
       .getOrElse {
-        accountRepository.store(
-          Account(inputData.email, inputData.password, inputData.name))
+        (for {
+          _ <- accountRepository.store(
+            Account(inputData.email, inputData.password, inputData.name))
+        } yield ()).unsafeRunSync()
         Right(SignUpOutput(AccountId(10L)))
       }
 }
