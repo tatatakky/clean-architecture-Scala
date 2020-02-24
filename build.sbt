@@ -16,13 +16,17 @@ lazy val `entities` = (project in file("modules/entities")).
 lazy val `usecases` = (project in file("modules/usecases")).
   settings(
     name := s"$base-usecases",
+    libraryDependencies ++= Seq(
+      Cats.effect
+    )
   ).dependsOn(entities)
 
 lazy val `interfaces` = (project in file("modules/interfaces")).
   settings(
     name := s"$base-interfaces",
     libraryDependencies ++= Seq(
-      "org.wvlet.airframe" %% "airframe" % "20.2.1"
+      Wvlet.airframe,
+      Cats.effect
     )
   ).dependsOn(usecases)
 
@@ -42,4 +46,4 @@ lazy val root = (project in file(".")).
     usecases,
     interfaces,
     app
-  ).dependsOn(app)
+  )
