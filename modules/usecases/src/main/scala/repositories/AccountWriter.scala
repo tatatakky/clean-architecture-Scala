@@ -2,6 +2,6 @@ package repositories
 
 import entities.domain.Account
 
-trait AccountSingleWriter {
+trait AccountWriter {
   def store(account: Account): Unit
 }

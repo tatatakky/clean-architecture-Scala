@@ -9,19 +9,20 @@ case class SignUpInput(email: Email, password: Password, name: AccountName)
 case class SignUpOutput(id: AccountId)
 
 /**
- * Here is UseCase Interactor
- * @param accountRepository
- */
-class SignUpUseCase(accountRepository: AccountRepository) extends UseCase[SignUpInput, SignUpOutput] {
-  def execute(inputData: SignUpInput): Either[UseCaseError, SignUpOutput] = {
-    accountRepository.findBy(inputData.email) match {
-      case None => {
-        accountRepository.store(Account(inputData.email, inputData.password, inputData.name))
-        Right(SignUpOutput(AccountId(10L)))
-      }
-      case Some(_) => {
+  * Here is UseCase Interactor
+  * @param accountRepository
+  */
+class SignUpUseCase(accountRepository: AccountRepository)
+    extends UseCase[SignUpInput, SignUpOutput] {
+  def execute(inputData: SignUpInput): Either[UseCaseError, SignUpOutput] =
+    accountRepository
+      .findBy(inputData.email)
+      .map { _ =>
         Left(AlreadyExists)
       }
-    }
-  }
+      .getOrElse {
+        accountRepository.store(
+          Account(inputData.email, inputData.password, inputData.name))
+        Right(SignUpOutput(AccountId(10L)))
+      }
 }
