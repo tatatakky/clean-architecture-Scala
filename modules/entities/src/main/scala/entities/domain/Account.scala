@@ -1,3 +1,3 @@
 package entities.domain
 
-case class Account(email: Email, password: Password, accountName: AccountName)
+case class Account(name: Name, email: Email, password: Password)

@@ -1,7 +1,8 @@
 package repositories
 
-import entities.domain.{Email, AccountId}
+import entities.domain.Email
+import cats.effect.IO
 
 trait AccountRepository extends AccountWriter {
-  def findBy(email: Email): Option[AccountId]
+  def findBy(email: Email): IO[Option[Email]]
 }

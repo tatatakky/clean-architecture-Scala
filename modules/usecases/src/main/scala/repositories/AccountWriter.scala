@@ -5,5 +5,5 @@ import entities.domain.Account
 import cats.effect.IO
 
 trait AccountWriter {
-  def store(account: Account): IO[Unit]
+  def store(account: Account): IO[Account]
 }

@@ -1,14 +1,46 @@
 package adapters.gateway.repositories.dbaccess
 
-import entities.domain.{Account, AccountId, Email}
-import repositories.AccountRepository
-
+import doobie._
+import doobie.implicits._
+import scala.concurrent.ExecutionContext
 import cats.effect.IO
 
-class AccountRepositoryByDbAccess extends AccountRepository {
+import entities.domain.{Account, Email}
+import repositories.AccountRepository
 
-  override def findBy(email: Email): Option[AccountId] = None
+class AccountRepositoryByDbAccess() extends AccountRepository {
 
-  override def store(account: Account): IO[Unit] = IO { println(s"Stored: $account") }
+  implicit val cs = IO.contextShift(ExecutionContext.global)
+
+  val xa = Transactor.fromDriverManager[IO](
+    "org.postgresql.Driver",
+    "jdbc:postgresql:world",
+    "postgres",
+    ""
+  )
+
+  def findBy(email: Email): IO[Option[Email]] =
+    sql"select email from account where email = ${email.value}"
+      .query[Email]
+      .option
+      .transact(xa)
+
+  def store(account: Account): IO[Account] =
+    for {
+      _ <-
+        sql"insert into account (name, email, password) values ${account.name} ${account.email}, ${account.password}"
+          .update
+          .run
+          .transact(xa)
+      email <-
+        sql"select email from account where email = ${account.email}"
+          .query[Email]
+          .unique
+          .transact(xa)
+      account <- sql"select name, email, password from account where email = $email"
+          .query[Account]
+          .unique
+          .transact(xa)
+    } yield account
 
 }

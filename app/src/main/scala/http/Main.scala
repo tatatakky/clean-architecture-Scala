@@ -2,7 +2,7 @@ package http
 
 import adapters.DISettings
 import adapters.http.controllers.Controller
-import entities.domain.{AccountName, Email, Password}
+import entities.domain.{Email, Name, Password}
 import usecases.anonymous.SignUpInput
 
 object Main extends App {
@@ -11,7 +11,7 @@ object Main extends App {
   session.start
   val controller =
     session.build[Controller]
-  val res = controller.signUp(SignUpInput(Email("x@x.com"), Password("xxx"), AccountName("Bar")))
+  val signUpInput: SignUpInput = SignUpInput(Name("Foo"),Email("x@x.com"), Password("password"))
+  val res = controller.signUp(signUpInput)
   println(res)
-
 }

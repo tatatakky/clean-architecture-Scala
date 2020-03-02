@@ -5,8 +5,8 @@ import usecases.UseCaseError.AlreadyExists
 import entities.domain._
 import repositories.AccountRepository
 
-case class SignUpInput(email: Email, password: Password, name: AccountName)
-case class SignUpOutput(id: AccountId)
+case class SignUpInput(name: Name, email: Email, password: Password)
+case class SignUpOutput(name: Name, email: Email)
 
 /**
   * Here is UseCase Interactor
@@ -17,14 +17,15 @@ class SignUpUseCase(accountRepository: AccountRepository)
   def execute(inputData: SignUpInput): Either[UseCaseError, SignUpOutput] =
     accountRepository
       .findBy(inputData.email)
+      .unsafeRunSync()
       .map { _ =>
         Left(AlreadyExists)
       }
       .getOrElse {
-        (for {
-          _ <- accountRepository.store(
-            Account(inputData.email, inputData.password, inputData.name))
-        } yield ()).unsafeRunSync()
-        Right(SignUpOutput(AccountId(10L)))
+        val account = (for {
+          account <- accountRepository.store(
+            Account(inputData.name, inputData.email, inputData.password))
+        } yield account).unsafeRunSync()
+        Right(SignUpOutput(account.name, account.email))
       }
 }
