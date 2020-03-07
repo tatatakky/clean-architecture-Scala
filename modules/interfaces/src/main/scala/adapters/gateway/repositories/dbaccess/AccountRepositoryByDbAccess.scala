@@ -2,13 +2,13 @@ package adapters.gateway.repositories.dbaccess
 
 import doobie._
 import doobie.implicits._
+
 import scala.concurrent.ExecutionContext
 import cats.effect.IO
+import entities.domain.account.{Account, Email}
+import entities.domain.repositories.AccountRepository
 
-import entities.domain.{Account, Email}
-import repositories.AccountRepository
-
-class AccountRepositoryByDbAccess() extends AccountRepository {
+class AccountRepositoryByDbAccess extends AccountRepository {
 
   implicit val cs = IO.contextShift(ExecutionContext.global)
 
@@ -26,21 +26,18 @@ class AccountRepositoryByDbAccess() extends AccountRepository {
       .transact(xa)
 
   def store(account: Account): IO[Account] =
-    for {
+    (for {
       _ <-
         sql"insert into account (name, email, password) values ${account.name} ${account.email}, ${account.password}"
           .update
           .run
-          .transact(xa)
       email <-
         sql"select email from account where email = ${account.email}"
           .query[Email]
           .unique
-          .transact(xa)
       account <- sql"select name, email, password from account where email = $email"
           .query[Account]
           .unique
-          .transact(xa)
-    } yield account
+    } yield account).transact(xa)
 
 }

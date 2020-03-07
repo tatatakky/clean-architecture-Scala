@@ -1,6 +1,6 @@
 package adapters.http.presenters
 
-import entities.domain.{Name, Email}
+import entities.domain.account.{Email, Name}
 import usecases.UseCaseError.AlreadyExists
 import usecases.UseCaseError
 import usecases.anonymous.SignUpOutput

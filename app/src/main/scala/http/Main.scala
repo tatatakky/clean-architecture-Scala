@@ -2,7 +2,7 @@ package http
 
 import adapters.DISettings
 import adapters.http.controllers.Controller
-import entities.domain.{Email, Name, Password}
+import entities.domain.account.{Email, Name, Password}
 import usecases.anonymous.SignUpInput
 
 object Main extends App {

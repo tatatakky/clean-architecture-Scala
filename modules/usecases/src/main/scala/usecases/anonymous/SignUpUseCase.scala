@@ -1,9 +1,11 @@
 package usecases.anonymous
 
+import cats.effect.IO
 import usecases.{UseCase, UseCaseError}
 import usecases.UseCaseError.AlreadyExists
 import entities.domain._
-import repositories.AccountRepository
+import entities.domain.account.{Account, Email, Name, Password}
+import entities.domain.repositories.AccountRepository
 
 case class SignUpInput(name: Name, email: Email, password: Password)
 case class SignUpOutput(name: Name, email: Email)
@@ -15,17 +17,21 @@ case class SignUpOutput(name: Name, email: Email)
 class SignUpUseCase(accountRepository: AccountRepository)
     extends UseCase[SignUpInput, SignUpOutput] {
   def execute(inputData: SignUpInput): Either[UseCaseError, SignUpOutput] =
-    accountRepository
-      .findBy(inputData.email)
-      .unsafeRunSync()
-      .map { _ =>
-        Left(AlreadyExists)
+    (for {
+      maybe <- accountRepository.findBy(inputData.email)
+      result <- maybe.map{_ =>
+        IO{AlreadyExists}
+      }.getOrElse(
+        accountRepository.store(Account(
+          inputData.name,
+          inputData.email,
+          inputData.password)
+        )
+      )
+    } yield {
+      result match {
+        case ae@AlreadyExists => Left(ae)
+        case acc: Account => Right(SignUpOutput(acc.name, acc.email))
       }
-      .getOrElse {
-        val account = (for {
-          account <- accountRepository.store(
-            Account(inputData.name, inputData.email, inputData.password))
-        } yield account).unsafeRunSync()
-        Right(SignUpOutput(account.name, account.email))
-      }
+    }).unsafeRunSync()
 }

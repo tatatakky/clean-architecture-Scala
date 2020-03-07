@@ -1,6 +1,6 @@
 package adapters
 
-import repositories.AccountRepository
+import entities.domain.repositories.AccountRepository
 import gateway.repositories.dbaccess.AccountRepositoryByDbAccess
 import wvlet.airframe._
 

@@ -11,6 +11,10 @@ scalacOptions += "-Ypartial-unification"
 lazy val `entities` = (project in file("modules/entities")).
   settings(
     name := s"$base-entities",
+    libraryDependencies ++= Seq(
+      Cats.core,
+      CatsEffect.effect
+    )
   )
 
 lazy val `usecases` = (project in file("modules/usecases")).
